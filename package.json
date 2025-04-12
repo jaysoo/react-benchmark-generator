@@ -3,5 +3,10 @@
   "version": "0.3.0",
   "dependencies": {
     "faker": "^5.5.3"
+  },
+  "devDependencies": {
+    "@types/react": "^19.1.1",
+    "react": "^19.1.0",
+    "typescript": "^5.8.3"
   }
 }

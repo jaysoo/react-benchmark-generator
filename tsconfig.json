@@ -1,0 +1,12 @@
+{
+  "compilerOptions": {
+    "target": "module",
+    "jsx": "react-jsx",
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "outDir": "./out-tsc",
+    "esModuleInterop": true,
+    "strict": true,
+    "skipLibCheck": true
+  }
+}

@@ -104,10 +104,10 @@ function renderHTML(tree, indent) {
   return `${indent}<${tree.tag}${props}>\n${children.join('\n')}${(children.length ? '\n' : '') + indent}</${tree.tag}>`;
 }
 
-function generateComponent(name, toExport = false, customChildren = [], maxChildren = 20) {
+function generateComponent(name, toExport = false, customChildren = [], maxChildren = 20, defaultExport = false) {
   const tree = generateHTML(customChildren, maxChildren);
   const body = renderHTML(tree, '    ');
-  return `${toExport ? 'export ' : ''}function ${name}(_props: { children?: React.ReactNode; className?: string }) {\n  return (\n${body}\n  );\n}`;
+  return `${toExport ? 'export ' : ''}${defaultExport ? 'default ': ''}function ${name}(_props: { children?: ReactNode; className?: string }) {\n  return (\n${body}\n  );\n}`;
 }
 
 function generateFile(directory, maxComponents, maxChildren) {
@@ -118,7 +118,7 @@ function generateFile(directory, maxComponents, maxChildren) {
   const deps = components.map((c) => generateComponent(c, false, [], maxChildren));
   const root = generateComponent(rootComponent, true, components, maxChildren);
 
-  const imports = ['import * as React from "react";'].join('\n');
+  const imports = ['import type { ReactNode } from "react";'].join('\n');
 
   fs.mkdir(directory, { recursive: true }, () => {});
   fs.writeFileSync(path.join(directory, rootComponent + '.tsx'), [imports, ...deps, root].join('\n\n'));
@@ -127,7 +127,7 @@ function generateFile(directory, maxComponents, maxChildren) {
 }
 
 function generateIndex(directory, components) {
-  const imports = ['import React from "react";'];
+  const imports = [];
   const justTheNames = components.map(function addImport(c) {
     let directory = ".";
     let file = c;
@@ -141,7 +141,7 @@ function generateIndex(directory, components) {
   });
 
   const exportName = randomWords(1, 3).map(capitalize).join('') + (mt_id++);
-  const root = generateComponent(exportName, true, justTheNames, justTheNames.length);
+  const root = generateComponent(exportName, true, justTheNames, justTheNames.length, true);
 
   fs.writeFileSync(path.join(directory, 'index.tsx'), [imports.join('\n'), root].join('\n\n'));
   return exportName;
