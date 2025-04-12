@@ -44,8 +44,6 @@ function randomWords(low, high, sep) {
 
 const PROPS = {
   className: () => randomWords(1, 5, '-'),
-  id: () => randomWords(1, 5, '-'),
-  title: () => randomWords(1, 5, ' '),
 };
 
 function generateHTML(customComponents, maxChildren) {
@@ -53,7 +51,7 @@ function generateHTML(customComponents, maxChildren) {
     return;
   }
 
-  const elements = ['div', 'span', 'p', ...customComponents];
+  const elements = ['div', ...customComponents];
 
   const tag = elements[randomInt(0, elements.length - 1)];
 
@@ -109,7 +107,7 @@ function renderHTML(tree, indent) {
 function generateComponent(name, toExport = false, customChildren = [], maxChildren = 20) {
   const tree = generateHTML(customChildren, maxChildren);
   const body = renderHTML(tree, '    ');
-  return `${toExport ? 'export ' : ''}function ${name}() {\n  return (\n${body}\n  );\n}`;
+  return `${toExport ? 'export ' : ''}function ${name}(_props: { children?: React.ReactNode; className?: string }) {\n  return (\n${body}\n  );\n}`;
 }
 
 function generateFile(directory, maxComponents, maxChildren) {
@@ -120,10 +118,10 @@ function generateFile(directory, maxComponents, maxChildren) {
   const deps = components.map((c) => generateComponent(c, false, [], maxChildren));
   const root = generateComponent(rootComponent, true, components, maxChildren);
 
-  const imports = ['import React from "react";'].join('\n');
+  const imports = ['import * as React from "react";'].join('\n');
 
   fs.mkdir(directory, { recursive: true }, () => {});
-  fs.writeFileSync(path.join(directory, rootComponent + '.jsx'), [imports, ...deps, root].join('\n\n'));
+  fs.writeFileSync(path.join(directory, rootComponent + '.tsx'), [imports, ...deps, root].join('\n\n'));
 
   return rootComponent;
 }
@@ -138,14 +136,14 @@ function generateIndex(directory, components) {
       file = c.file;
       c = c.import;
     }
-    imports.push(`import { ${c} } from '${directory}/${file}.jsx';`);
+    imports.push(`import { ${c} } from '${directory}/${file}';`);
     return c;
   });
 
   const exportName = randomWords(1, 3).map(capitalize).join('') + (mt_id++);
   const root = generateComponent(exportName, true, justTheNames, justTheNames.length);
 
-  fs.writeFileSync(path.join(directory, 'index.jsx'), [imports.join('\n'), root].join('\n\n'));
+  fs.writeFileSync(path.join(directory, 'index.tsx'), [imports.join('\n'), root].join('\n\n'));
   return exportName;
 }
 
